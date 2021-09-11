@@ -4,9 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.0.0</Version>
+    <Version>1.0.0.1</Version>
     <PackageId>InversionEnforcer</PackageId>
     <Title>InversionEnforcer</Title>
+    <Description>Prohibit using new operators</Description>
     <Authors>Sergey Aseev (Serg046)</Authors>
     <PackageProjectUrl>https://github.com/Serg046/InversionEnforcer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Serg046/InversionEnforcer</RepositoryUrl>
@@ -14,6 +15,7 @@
     <PackageTags>InversionEnforcer new analyzer di ioc</PackageTags>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
   <ItemGroup>
