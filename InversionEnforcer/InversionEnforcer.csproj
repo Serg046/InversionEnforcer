@@ -4,6 +4,16 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <Version>1.0.0.0</Version>
+    <PackageId>InversionEnforcer</PackageId>
+    <Title>InversionEnforcer</Title>
+    <Authors>Sergey Aseev (Serg046)</Authors>
+    <PackageProjectUrl>https://github.com/Serg046/InversionEnforcer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Serg046/InversionEnforcer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>InversionEnforcer new analyzer di ioc</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
