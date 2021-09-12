@@ -4,10 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <PackageId>InversionEnforcer</PackageId>
     <Title>InversionEnforcer</Title>
-    <Description>Prohibit using new operators</Description>
+    <Description>Prohibit using of new operators</Description>
     <Authors>Sergey Aseev (Serg046)</Authors>
     <PackageProjectUrl>https://github.com/Serg046/InversionEnforcer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Serg046/InversionEnforcer</RepositoryUrl>
@@ -24,6 +24,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="tools\*.ps1" CopyToOutputDirectory="Always" Pack="true" PackagePath="" />
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
 </Project>
