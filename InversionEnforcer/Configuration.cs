@@ -9,6 +9,7 @@ namespace InversionEnforcer
 		private readonly string[]? _includedNamespaces;
 		private readonly string[]? _excludedNamespaces;
 		private readonly string[]? _excludedTypes;
+		private readonly string[]? _excludedAssemblies;
 
 		public Configuration(SyntaxNodeAnalysisContext context, AnalyzerConfigOptions config)
 		{
@@ -22,19 +23,35 @@ namespace InversionEnforcer
 				_excludedNamespaces = excludedNamespaces.Split(',');
 			}
 
+			if (_includedNamespaces != null && _excludedNamespaces != null)
+			{
+				context.ReportDiagnostic(Diagnostic.Create(ProhibitNewAnalyzer.ConfigurationRule, Location.None));
+			}
+
 			if (config.TryGetValue("dotnet_diagnostic.DI0001.excluded_types", out var excludedTypes))
 			{
 				_excludedTypes = excludedTypes.Split(',');
 			}
 
-			if (_includedNamespaces != null && _excludedNamespaces != null)
+			if (config.TryGetValue("dotnet_diagnostic.DI0001.excluded_assemblies", out var excludedAssemblies))
 			{
-				context.ReportDiagnostic(Diagnostic.Create(ProhibitNewAnalyzer.ConfigurationRule, Location.None));
+				_excludedAssemblies = excludedAssemblies.Split(',');
 			}
 		}
 
-		public bool Validate(ISymbol type)
+		public bool Validate(ISymbol type, string? assemblyName)
 		{
+			if (_excludedAssemblies != null)
+			{
+				foreach (var asm in _excludedAssemblies)
+				{
+					if (assemblyName == asm)
+					{
+						return true;
+					}
+				}
+			}
+
 			if (_includedNamespaces != null)
 			{
 				foreach (var ns in _includedNamespaces)

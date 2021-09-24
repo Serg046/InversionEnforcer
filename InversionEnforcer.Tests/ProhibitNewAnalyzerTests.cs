@@ -79,5 +79,22 @@ namespace InversionEnforcer.Tests
 					{ "dotnet_diagnostic.DI0001.excluded_types", "System.Object" }
 				});
 		}
+
+		[Fact]
+		public async Task When_excluded_assembly_Should_not_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { System.Console.WriteLine(new object()); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(
+				test,
+				new Dictionary<string, string>
+				{
+					{ "dotnet_diagnostic.DI0001.excluded_assemblies", "TestProject" }
+				});
+		}
 	}
 }

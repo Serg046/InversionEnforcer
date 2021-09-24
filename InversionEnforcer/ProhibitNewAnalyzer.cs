@@ -48,7 +48,7 @@ namespace InversionEnforcer
 
 			var node = (ObjectCreationExpressionSyntax) context.Node;
 			var type = context.SemanticModel.GetSymbolInfo(node.Type).Symbol;
-			if (type != null && !_configuration.Validate(type))
+			if (type != null && !_configuration.Validate(type, context.Compilation.AssemblyName))
 			{
 				context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation()));
 			}
