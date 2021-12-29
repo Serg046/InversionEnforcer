@@ -31,7 +31,8 @@ namespace InversionEnforcer.Tests
 
 			await Verify.VerifyAnalyzerAsync(test, DiagnosticResult
 				.CompilerError(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
-				.WithSpan(3, 50, 3, 62));
+				.WithSpan(3, 50, 3, 62)
+				.WithMessage("Prefer using dependency inversion to new operator for the type System.Object"));
 		}
 
 		[Fact]
@@ -45,7 +46,7 @@ namespace InversionEnforcer.Tests
 
 			await Verify.VerifyAnalyzerAsync(
 				test,
-				new Dictionary<string, string> { { "dotnet_diagnostic.DI0001.included_namespaces", "System2"} });
+				new Dictionary<string, string> { { "dotnet_diagnostic.DI0002.included_namespaces", "System2"} });
 		}
 
 		[Fact]
@@ -59,7 +60,7 @@ namespace InversionEnforcer.Tests
 
 			await Verify.VerifyAnalyzerAsync(
 				test,
-				new Dictionary<string, string> { { "dotnet_diagnostic.DI0001.excluded_namespaces", "System" } });
+				new Dictionary<string, string> { { "dotnet_diagnostic.DI0002.excluded_namespaces", "System" } });
 		}
 
 		[Fact]
@@ -75,8 +76,8 @@ namespace InversionEnforcer.Tests
 				test,
 				new Dictionary<string, string>
 				{
-					{ "dotnet_diagnostic.DI0001.included_namespaces", "System" },
-					{ "dotnet_diagnostic.DI0001.excluded_types", "System.Object" }
+					{ "dotnet_diagnostic.DI0002.included_namespaces", "System" },
+					{ "dotnet_diagnostic.DI0002.excluded_types", "System.Object" }
 				});
 		}
 
@@ -93,7 +94,7 @@ namespace InversionEnforcer.Tests
 				test,
 				new Dictionary<string, string>
 				{
-					{ "dotnet_diagnostic.DI0001.excluded_assemblies", "TestProject" }
+					{ "dotnet_diagnostic.DI0002.excluded_assemblies", "TestProject" }
 				});
 		}
 	}

@@ -24,7 +24,7 @@ namespace InversionEnforcer
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisReleaseTracking", "RS2008:Enable analyzer release tracking", Justification = "No need")]
 		internal static readonly DiagnosticDescriptor NoNewOperatorsRule =
 			new ("DI0002", "New operator",
-				"Prefer using dependency inversion to new operator",
+				"Prefer using dependency inversion to new operator for the type {0}.{1}",
 				"Analyzers",
 				DiagnosticSeverity.Error, isEnabledByDefault: true);
 
@@ -50,7 +50,7 @@ namespace InversionEnforcer
 			var type = context.SemanticModel.GetSymbolInfo(node.Type).Symbol;
 			if (type != null && !_configuration.Validate(type, context.Compilation.AssemblyName))
 			{
-				context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation()));
+				context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation(), type.ContainingNamespace.Name, type.Name));
 			}
 		}
 	}

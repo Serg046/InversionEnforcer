@@ -13,12 +13,12 @@ namespace InversionEnforcer
 
 		public Configuration(SyntaxNodeAnalysisContext context, AnalyzerConfigOptions config)
 		{
-			if (config.TryGetValue("dotnet_diagnostic.DI0001.included_namespaces", out var includedNamespaces))
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.included_namespaces", out var includedNamespaces))
 			{
 				_includedNamespaces = includedNamespaces.Split(',');
 			}
 
-			if (config.TryGetValue("dotnet_diagnostic.DI0001.excluded_namespaces", out var excludedNamespaces))
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.excluded_namespaces", out var excludedNamespaces))
 			{
 				_excludedNamespaces = excludedNamespaces.Split(',');
 			}
@@ -28,12 +28,12 @@ namespace InversionEnforcer
 				context.ReportDiagnostic(Diagnostic.Create(ProhibitNewAnalyzer.ConfigurationRule, Location.None));
 			}
 
-			if (config.TryGetValue("dotnet_diagnostic.DI0001.excluded_types", out var excludedTypes))
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.excluded_types", out var excludedTypes))
 			{
 				_excludedTypes = excludedTypes.Split(',');
 			}
 
-			if (config.TryGetValue("dotnet_diagnostic.DI0001.excluded_assemblies", out var excludedAssemblies))
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.excluded_assemblies", out var excludedAssemblies))
 			{
 				_excludedAssemblies = excludedAssemblies.Split(',');
 			}
