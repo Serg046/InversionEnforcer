@@ -1,5 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -48,10 +50,28 @@ namespace InversionEnforcer
 
 			var node = (ObjectCreationExpressionSyntax) context.Node;
 			var type = context.SemanticModel.GetSymbolInfo(node.Type).Symbol;
-			if (type != null && !_configuration.Validate(type, context.Compilation.AssemblyName))
+			if (type != null)
 			{
-				context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation(), type.ContainingNamespace.Name, type.Name));
+				var ns = GetNamespace(type);
+				if (!_configuration.Validate(ns, type.Name, context.Compilation.AssemblyName))
+				{
+					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation(),
+						ns, type.Name));
+				}
 			}
+		}
+
+		private string GetNamespace(ISymbol type)
+		{
+			var ns = type.ContainingNamespace;
+			var sb = new StringBuilder();
+			while (!string.IsNullOrEmpty(ns.Name))
+			{
+				sb.Insert(0, ".").Insert(0, ns.Name);
+				ns = ns.ContainingNamespace;
+			}
+
+			return sb.Remove(sb.Length - 1, 1).ToString();
 		}
 	}
 }

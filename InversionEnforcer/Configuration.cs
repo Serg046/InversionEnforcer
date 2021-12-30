@@ -39,7 +39,7 @@ namespace InversionEnforcer
 			}
 		}
 
-		public bool Validate(ISymbol type, string? assemblyName)
+		public bool Validate(string @namespace, string typeName, string? assemblyName)
 		{
 			if (_excludedAssemblies != null)
 			{
@@ -56,9 +56,9 @@ namespace InversionEnforcer
 			{
 				foreach (var ns in _includedNamespaces)
 				{
-					if (type.ContainingNamespace.Name.StartsWith(ns, StringComparison.InvariantCultureIgnoreCase))
+					if (@namespace.StartsWith(ns, StringComparison.InvariantCultureIgnoreCase))
 					{
-						return ValidateIncludedType(type);
+						return ValidateIncludedType(@namespace, typeName);
 					}
 				}
 
@@ -68,21 +68,21 @@ namespace InversionEnforcer
 			{
 				foreach (var ns in _excludedNamespaces)
 				{
-					if (type.ContainingNamespace.Name.StartsWith(ns, StringComparison.InvariantCultureIgnoreCase))
+					if (@namespace.StartsWith(ns, StringComparison.InvariantCultureIgnoreCase))
 					{
 						return true;
 					}
 				}
 			}
 
-			return ValidateIncludedType(type);
+			return ValidateIncludedType(@namespace, typeName);
 		}
 
-		private bool ValidateIncludedType(ISymbol type)
+		private bool ValidateIncludedType(string @namespace, string type)
 		{
 			if (_excludedTypes != null)
 			{
-				var typeName = type.ContainingNamespace + "." + type.Name;
+				var typeName = @namespace + "." + type;
 				foreach (var excludedType in _excludedTypes)
 				{
 					if (excludedType.Equals(typeName, StringComparison.InvariantCultureIgnoreCase))
