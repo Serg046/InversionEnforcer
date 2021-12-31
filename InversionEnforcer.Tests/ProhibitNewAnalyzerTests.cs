@@ -133,5 +133,39 @@ namespace InversionEnforcer.Tests
 					{ "dotnet_diagnostic.DI0002.ignore_private_types", "True" }
 				});
 		}
+
+		[Fact]
+		public async Task When_excluded_file_Should_not_fail()
+		{
+			var test =
+				@"class Test
+{
+	public void Method() { System.Console.WriteLine(new object()); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(
+				test,
+				new Dictionary<string, string>
+				{
+					{ "dotnet_diagnostic.DI0002.excluded_files", "/0/Test0.cs" }
+				});
+		}
+
+		[Fact]
+		public async Task When_excluded_file_by_suffix_Should_not_fail()
+		{
+			var test =
+				@"class Test
+{
+	public void Method() { System.Console.WriteLine(new object()); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(
+				test,
+				new Dictionary<string, string>
+				{
+					{ "dotnet_diagnostic.DI0002.excluded_files", "Test0.cs" }
+				});
+		}
 	}
 }

@@ -52,9 +52,10 @@ namespace InversionEnforcer
 			if (type != null)
 			{
 				var ns = GetNamespace(type);
-				if (!_configuration.Validate(ns, type, context.Compilation.AssemblyName))
+				var location = context.Node.GetLocation();
+				if (!_configuration.Validate(location.SourceTree?.FilePath, ns, type, context.Compilation.AssemblyName))
 				{
-					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation(),
+					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, location,
 						ns, type.Name));
 				}
 			}
