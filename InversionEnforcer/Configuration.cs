@@ -11,7 +11,7 @@ namespace InversionEnforcer
 		private readonly string[]? _excludedTypes;
 		private readonly string[]? _excludedAssemblies;
 		private readonly string[]? _excludedFiles;
-		private readonly bool _ignorePrivateTypes;
+		private readonly bool _excludedPrivateTypes;
 
 		public Configuration(SyntaxNodeAnalysisContext context, AnalyzerConfigOptions config)
 		{
@@ -45,9 +45,9 @@ namespace InversionEnforcer
 				_excludedFiles = excludedFiles.Split(',');
 			}
 
-			if (config.TryGetValue("dotnet_diagnostic.DI0002.ignore_private_types", out var ignorePrivateTypes))
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.excluded_private_types", out var excludedPrivateTypes))
 			{
-				_ignorePrivateTypes = bool.TryParse(ignorePrivateTypes, out var ignore) && ignore;
+				_excludedPrivateTypes = bool.TryParse(excludedPrivateTypes, out var ignore) && ignore;
 			}
 		}
 
@@ -57,7 +57,7 @@ namespace InversionEnforcer
 			{
 				foreach (var excludedPath in _excludedFiles)
 				{
-					if (filePath.EndsWith(excludedPath, StringComparison.InvariantCultureIgnoreCase))
+					if (filePath.Equals(excludedPath, StringComparison.InvariantCultureIgnoreCase))
 					{
 						return true;
 					}
@@ -103,7 +103,7 @@ namespace InversionEnforcer
 
 		private bool ValidateIncludedType(string @namespace, ISymbol type)
 		{
-			if (_ignorePrivateTypes && type.DeclaredAccessibility == Accessibility.Private)
+			if (_excludedPrivateTypes && type.DeclaredAccessibility == Accessibility.Private)
 			{
 				return true;
 			}
