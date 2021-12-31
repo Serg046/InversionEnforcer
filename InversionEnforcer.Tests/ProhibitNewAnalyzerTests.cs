@@ -99,6 +99,23 @@ namespace InversionEnforcer.Tests
 		}
 
 		[Fact]
+		public async Task When_new_operator_for_nested_type_Should_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { System.Console.WriteLine(new Nested()); }
+	
+	private class Nested {}
+}";
+
+			await Verify.VerifyAnalyzerAsync(test, DiagnosticResult
+				.CompilerError(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
+				.WithSpan(3, 50, 3, 62)
+				.WithMessage("Prefer using dependency inversion to new operator for the type Test.Nested"));
+		}
+
+		[Fact]
 		public async Task When_new_operator_for_private_type_Should_not_fail()
 		{
 			var test =

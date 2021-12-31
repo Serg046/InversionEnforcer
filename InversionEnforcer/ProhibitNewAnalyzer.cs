@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -61,17 +60,33 @@ namespace InversionEnforcer
 			}
 		}
 
-		private string GetNamespace(ISymbol type)
+		private string GetNamespace(ISymbol symbol)
 		{
-			var ns = type.ContainingNamespace;
 			var sb = new StringBuilder();
-			while (!string.IsNullOrEmpty(ns.Name))
+			while (GetPath(symbol, out symbol))
 			{
-				sb.Insert(0, ".").Insert(0, ns.Name);
-				ns = ns.ContainingNamespace;
+				sb.Insert(0, ".").Insert(0, symbol.Name);
 			}
 
 			return sb.Length > 0 ? sb.Remove(sb.Length - 1, 1).ToString() : string.Empty;
+		}
+
+		private bool GetPath(ISymbol inputSymbol, out ISymbol symbol)
+		{
+			if (inputSymbol.ContainingType != null)
+			{
+				symbol = inputSymbol.ContainingType;
+				return true;
+			}
+
+			if (!string.IsNullOrEmpty(inputSymbol.ContainingNamespace.Name))
+			{
+				symbol = inputSymbol.ContainingNamespace;
+				return true;
+			}
+
+			symbol = null!;
+			return false;
 		}
 	}
 }
