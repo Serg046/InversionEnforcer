@@ -130,7 +130,7 @@ namespace InversionEnforcer.Tests
 				test,
 				new Dictionary<string, string>
 				{
-					{ "dotnet_diagnostic.DI0002.excluded_private_types", "True" }
+					{ "dotnet_diagnostic.DI0002.exclude_private_types", "True" }
 				});
 		}
 
