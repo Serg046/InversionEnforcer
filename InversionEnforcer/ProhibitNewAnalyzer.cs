@@ -53,7 +53,7 @@ namespace InversionEnforcer
 			if (type != null)
 			{
 				var ns = GetNamespace(type);
-				if (!_configuration.Validate(ns, type.Name, context.Compilation.AssemblyName))
+				if (!_configuration.Validate(ns, type, context.Compilation.AssemblyName))
 				{
 					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, context.Node.GetLocation(),
 						ns, type.Name));
@@ -71,7 +71,7 @@ namespace InversionEnforcer
 				ns = ns.ContainingNamespace;
 			}
 
-			return sb.Remove(sb.Length - 1, 1).ToString();
+			return sb.Length > 0 ? sb.Remove(sb.Length - 1, 1).ToString() : string.Empty;
 		}
 	}
 }

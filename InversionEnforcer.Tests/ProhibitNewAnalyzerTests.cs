@@ -97,5 +97,24 @@ namespace InversionEnforcer.Tests
 					{ "dotnet_diagnostic.DI0002.excluded_assemblies", "TestProject" }
 				});
 		}
+
+		[Fact]
+		public async Task When_new_operator_for_private_type_Should_not_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { System.Console.WriteLine(new Nested()); }
+	
+	private class Nested {}
+}";
+
+			await Verify.VerifyAnalyzerAsync(
+				test,
+				new Dictionary<string, string>
+				{
+					{ "dotnet_diagnostic.DI0002.ignore_private_types", "True" }
+				});
+		}
 	}
 }

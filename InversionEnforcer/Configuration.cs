@@ -10,6 +10,7 @@ namespace InversionEnforcer
 		private readonly string[]? _excludedNamespaces;
 		private readonly string[]? _excludedTypes;
 		private readonly string[]? _excludedAssemblies;
+		private readonly bool _ignorePrivateTypes;
 
 		public Configuration(SyntaxNodeAnalysisContext context, AnalyzerConfigOptions config)
 		{
@@ -37,9 +38,14 @@ namespace InversionEnforcer
 			{
 				_excludedAssemblies = excludedAssemblies.Split(',');
 			}
+
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.ignore_private_types", out var ignorePrivateTypes))
+			{
+				_ignorePrivateTypes = bool.TryParse(ignorePrivateTypes, out var ignore) && ignore;
+			}
 		}
 
-		public bool Validate(string @namespace, string typeName, string? assemblyName)
+		public bool Validate(string @namespace, ISymbol type, string? assemblyName)
 		{
 			if (_excludedAssemblies != null)
 			{
@@ -58,7 +64,7 @@ namespace InversionEnforcer
 				{
 					if (@namespace.StartsWith(ns, StringComparison.InvariantCultureIgnoreCase))
 					{
-						return ValidateIncludedType(@namespace, typeName);
+						return ValidateIncludedType(@namespace, type);
 					}
 				}
 
@@ -75,14 +81,19 @@ namespace InversionEnforcer
 				}
 			}
 
-			return ValidateIncludedType(@namespace, typeName);
+			return ValidateIncludedType(@namespace, type);
 		}
 
-		private bool ValidateIncludedType(string @namespace, string type)
+		private bool ValidateIncludedType(string @namespace, ISymbol type)
 		{
+			if (_ignorePrivateTypes && type.DeclaredAccessibility == Accessibility.Private)
+			{
+				return true;
+			}
+
 			if (_excludedTypes != null)
 			{
-				var typeName = @namespace + "." + type;
+				var typeName = @namespace + "." + type.Name;
 				foreach (var excludedType in _excludedTypes)
 				{
 					if (excludedType.Equals(typeName, StringComparison.InvariantCultureIgnoreCase))
