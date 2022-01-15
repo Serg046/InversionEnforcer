@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -42,7 +43,9 @@ namespace InversionEnforcer
 
 			if (config.TryGetValue("dotnet_diagnostic.DI0002.excluded_files", out var excludedFiles))
 			{
-				_excludedFiles = excludedFiles.Split(',');
+				_excludedFiles = excludedFiles.Split(',')
+					.Select(path => path.Replace("\\", "/").TrimStart('/'))
+					.ToArray();
 			}
 
 			if (config.TryGetValue("dotnet_diagnostic.DI0002.exclude_private_types", out var excludePrivateTypes))
@@ -57,7 +60,7 @@ namespace InversionEnforcer
 			{
 				foreach (var excludedPath in _excludedFiles)
 				{
-					if (filePath.Equals(excludedPath, StringComparison.InvariantCultureIgnoreCase))
+					if (filePath.EndsWith(excludedPath, StringComparison.InvariantCultureIgnoreCase))
 					{
 						return true;
 					}
