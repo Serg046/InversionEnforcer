@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <Version>1.2.3.3</Version>
+    <Version>1.2.3.4</Version>
     <PackageId>InversionEnforcer</PackageId>
     <Title>InversionEnforcer</Title>
     <Description>Prohibit using of new operators</Description>

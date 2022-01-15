@@ -44,7 +44,7 @@ namespace InversionEnforcer
 			if (config.TryGetValue("dotnet_diagnostic.DI0002.excluded_files", out var excludedFiles))
 			{
 				_excludedFiles = excludedFiles.Split(',')
-					.Select(path => path.Replace("\\", "/").TrimStart('/'))
+					.Select(path => NormalizePath(path).TrimStart('/'))
 					.ToArray();
 			}
 
@@ -54,13 +54,15 @@ namespace InversionEnforcer
 			}
 		}
 
+		private string NormalizePath(string path) => path.Replace("\\", "/");
+
 		public bool Validate(string? filePath, string @namespace, ISymbol type, string? assemblyName)
 		{
 			if (filePath != null && _excludedFiles != null)
 			{
 				foreach (var excludedPath in _excludedFiles)
 				{
-					if (filePath.EndsWith(excludedPath, StringComparison.InvariantCultureIgnoreCase))
+					if (NormalizePath(filePath).EndsWith(excludedPath, StringComparison.InvariantCultureIgnoreCase))
 					{
 						return true;
 					}
