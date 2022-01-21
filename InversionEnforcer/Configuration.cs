@@ -13,6 +13,7 @@ namespace InversionEnforcer
 		private readonly string[]? _excludedAssemblies;
 		private readonly string[]? _excludedFiles;
 		private readonly bool _excludePrivateTypes;
+		private readonly bool _excludeNestedTypes;
 
 		public Configuration(SyntaxNodeAnalysisContext context, AnalyzerConfigOptions config)
 		{
@@ -51,6 +52,11 @@ namespace InversionEnforcer
 			if (config.TryGetValue("dotnet_diagnostic.DI0002.exclude_private_types", out var excludePrivateTypes))
 			{
 				_excludePrivateTypes = bool.TryParse(excludePrivateTypes, out var ignore) && ignore;
+			}
+
+			if (config.TryGetValue("dotnet_diagnostic.DI0002.exclude_nested_types", out var excludeNestedTypes))
+			{
+				_excludeNestedTypes = bool.TryParse(excludeNestedTypes, out var ignore) && ignore;
 			}
 		}
 
@@ -108,6 +114,11 @@ namespace InversionEnforcer
 
 		private bool ValidateIncludedType(string @namespace, ISymbol type)
 		{
+			if (_excludeNestedTypes && type.ContainingType != null)
+			{
+				return true;
+			}
+
 			if (_excludePrivateTypes && type.DeclaredAccessibility == Accessibility.Private)
 			{
 				return true;

@@ -99,7 +99,7 @@ namespace InversionEnforcer.Tests
 		}
 
 		[Fact]
-		public async Task When_new_operator_for_nested_type_Should_fail()
+		public async Task When_new_operator_for_nested_type_witout_setting_Should_fail()
 		{
 			var test =
 @"class Test
@@ -131,6 +131,25 @@ namespace InversionEnforcer.Tests
 				new Dictionary<string, string>
 				{
 					{ "dotnet_diagnostic.DI0002.exclude_private_types", "True" }
+				});
+		}
+
+		[Fact]
+		public async Task When_new_operator_for_nested_type_Should_not_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { System.Console.WriteLine(new Nested()); }
+	
+	internal class Nested {}
+}";
+
+			await Verify.VerifyAnalyzerAsync(
+				test,
+				new Dictionary<string, string>
+				{
+					{ "dotnet_diagnostic.DI0002.exclude_nested_types", "True" }
 				});
 		}
 
