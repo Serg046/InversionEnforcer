@@ -27,10 +27,17 @@ namespace InversionEnforcer
 			new ("DI0002", "New operator",
 				"Prefer using dependency inversion to new operator for the type {0}.{1}",
 				"Analyzers",
-				DiagnosticSeverity.Error, isEnabledByDefault: true);
+				DiagnosticSeverity.Warning, isEnabledByDefault: true);
+
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisReleaseTracking", "RS2008:Enable analyzer release tracking", Justification = "No need")]
+		internal static readonly DiagnosticDescriptor TooManyDependenciesRule =
+			new("DI0003", "Too many dependencies",
+				"The constructor '{0}' has {1} dependencies which is more than allowed",
+				"Analyzers",
+				DiagnosticSeverity.Warning, isEnabledByDefault: true);
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
-			= ImmutableArray.Create(NoNewOperatorsRule);
+			= ImmutableArray.Create(ConfigurationRule, NoNewOperatorsRule, TooManyDependenciesRule);
 
 		public override void Initialize(AnalysisContext context)
 		{
@@ -55,9 +62,15 @@ namespace InversionEnforcer
 				var location = context.Node.GetLocation();
 				if (!_configuration.Validate(location.SourceTree?.FilePath, ns, type, context.Compilation.AssemblyName))
 				{
-					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, location,
-						ns, type.Name));
+					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, location, ns, type.Name));
 				}
+			}
+
+			if (_configuration.AllowedNumberOfDependencies != -1 && node.ArgumentList != null &&
+			    node.ArgumentList.Arguments.Count > _configuration.AllowedNumberOfDependencies)
+			{
+				var location = context.Node.GetLocation();
+				context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, location, node, node.ArgumentList.Arguments.Count));
 			}
 		}
 

@@ -58,7 +58,14 @@ namespace InversionEnforcer
 			{
 				_excludeNestedTypes = bool.TryParse(excludeNestedTypes, out var ignore) && ignore;
 			}
+
+			if (config.TryGetValue("dotnet_diagnostic.DI0003.allowed_number_of_dependencies", out var allowedNumberOfDependencies))
+			{
+				AllowedNumberOfDependencies = int.TryParse(allowedNumberOfDependencies, out var number) ? number : -1;
+			}
 		}
+
+		public int AllowedNumberOfDependencies { get; }
 
 		private string NormalizePath(string path) => path.Replace("\\", "/");
 

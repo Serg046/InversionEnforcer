@@ -30,7 +30,7 @@ namespace InversionEnforcer.Tests
 }";
 
 			await Verify.VerifyAnalyzerAsync(test, DiagnosticResult
-				.CompilerError(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
+				.CompilerWarning(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
 				.WithSpan(3, 50, 3, 62)
 				.WithMessage("Prefer using dependency inversion to new operator for the type System.Object"));
 		}
@@ -110,7 +110,7 @@ namespace InversionEnforcer.Tests
 }";
 
 			await Verify.VerifyAnalyzerAsync(test, DiagnosticResult
-				.CompilerError(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
+				.CompilerWarning(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
 				.WithSpan(3, 50, 3, 62)
 				.WithMessage("Prefer using dependency inversion to new operator for the type Test.Nested"));
 		}
@@ -157,7 +157,7 @@ namespace InversionEnforcer.Tests
 		public async Task When_excluded_file_Should_not_fail()
 		{
 			var test =
-				@"class Test
+@"class Test
 {
 	public void Method() { System.Console.WriteLine(new object()); }
 }";
@@ -167,6 +167,44 @@ namespace InversionEnforcer.Tests
 				new Dictionary<string, string>
 				{
 					{ "dotnet_diagnostic.DI0002.excluded_files", "/0/Test0.cs" }
+				});
+		}
+
+		[Fact]
+		public async Task When_too_many_dependencies_Should_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { System.Console.WriteLine(new System.Collections.Generic.KeyValuePair<int, int>(1, 2)); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(test,
+				new Dictionary<string, string>
+				{
+					{"dotnet_diagnostic.DI0002.excluded_namespaces", "System"},
+					{"dotnet_diagnostic.DI0003.allowed_number_of_dependencies", "1"}
+				}, DiagnosticResult
+					.CompilerWarning(ProhibitNewAnalyzer.TooManyDependenciesRule.Id)
+					.WithSpan(3, 50, 3, 109)
+					.WithMessage("The constructor 'new System.Collections.Generic.KeyValuePair<int, int>(1, 2)' has 2 dependencies which is more than allowed"));
+		}
+
+		[Fact]
+		public async Task When_allowed_number_of_dependencies_Should_not_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { System.Console.WriteLine(new System.Collections.Generic.KeyValuePair<int, int>(1, 2)); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(
+				test,
+				new Dictionary<string, string>
+				{
+					{ "dotnet_diagnostic.DI0002.excluded_namespaces", "System" },
+					{ "dotnet_diagnostic.DI0003.allowed_number_of_dependencies", "2" }
 				});
 		}
 	}
