@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -9,12 +10,11 @@ using Microsoft.CodeAnalysis.Diagnostics;
 [assembly: InternalsVisibleTo("InversionEnforcer.Tests")]
 namespace InversionEnforcer
 {
-
 	[DiagnosticAnalyzer(LanguageNames.CSharp)]
 	public class ProhibitNewAnalyzer : DiagnosticAnalyzer
 	{
 		private Configuration? _configuration;
-
+		
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisReleaseTracking", "RS2008:Enable analyzer release tracking", Justification = "No need")]
 		internal static readonly DiagnosticDescriptor ConfigurationRule =
 			new("DI0001", "Configuration error",
@@ -32,7 +32,7 @@ namespace InversionEnforcer
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisReleaseTracking", "RS2008:Enable analyzer release tracking", Justification = "No need")]
 		internal static readonly DiagnosticDescriptor TooManyDependenciesRule =
 			new("DI0003", "Too many dependencies",
-				"The constructor '{0}' has {1} dependencies which is more than allowed",
+				"The constructor '{0} {1}' has {2} dependencies which is more than allowed",
 				"Analyzers",
 				DiagnosticSeverity.Warning, isEnabledByDefault: true);
 
@@ -43,10 +43,31 @@ namespace InversionEnforcer
 		{
 			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
 			context.EnableConcurrentExecution();
-			context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ObjectCreationExpression);
+			context.RegisterSyntaxNodeAction(AnalyzeObjectCreationNode, SyntaxKind.ObjectCreationExpression);
+			context.RegisterSyntaxNodeAction(AnalyzeTypeDeclarationNode, SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, SyntaxKind.RecordDeclaration);
 		}
 
-		private void AnalyzeNode(SyntaxNodeAnalysisContext context)
+		private void AnalyzeTypeDeclarationNode(SyntaxNodeAnalysisContext context)
+		{
+			if (_configuration == null)
+			{
+				var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree);
+				_configuration = new Configuration(context, options);
+			}
+
+			foreach (var ctor in context.Node.DescendantNodes().OfType<ConstructorDeclarationSyntax>())
+			{
+				if (ctor.ParameterList.Parameters.Count > _configuration.AllowedNumberOfDependencies)
+				{
+					var typeDeclaration = (TypeDeclarationSyntax) context.Node;
+					var parameters = ctor.DescendantNodes().OfType<ParameterListSyntax>().Single();
+					var location = context.Node.GetLocation();
+					context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, location, typeDeclaration.Identifier, parameters, ctor.ParameterList.Parameters.Count));
+				}
+			}
+		}
+
+		private void AnalyzeObjectCreationNode(SyntaxNodeAnalysisContext context)
 		{
 			if (_configuration == null)
 			{
@@ -64,13 +85,6 @@ namespace InversionEnforcer
 				{
 					context.ReportDiagnostic(Diagnostic.Create(NoNewOperatorsRule, location, ns, type.Name));
 				}
-			}
-
-			if (_configuration.AllowedNumberOfDependencies != -1 && node.ArgumentList != null &&
-			    node.ArgumentList.Arguments.Count > _configuration.AllowedNumberOfDependencies)
-			{
-				var location = context.Node.GetLocation();
-				context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, location, node, node.ArgumentList.Arguments.Count));
 			}
 		}
 

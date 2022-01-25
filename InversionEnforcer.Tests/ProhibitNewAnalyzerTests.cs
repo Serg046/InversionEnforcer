@@ -176,18 +176,17 @@ namespace InversionEnforcer.Tests
 			var test =
 @"class Test
 {
-	public void Method() { System.Console.WriteLine(new System.Collections.Generic.KeyValuePair<int, int>(1, 2)); }
+	public Test(int x, int y) {}
 }";
 
 			await Verify.VerifyAnalyzerAsync(test,
 				new Dictionary<string, string>
 				{
-					{"dotnet_diagnostic.DI0002.excluded_namespaces", "System"},
 					{"dotnet_diagnostic.DI0003.allowed_number_of_dependencies", "1"}
 				}, DiagnosticResult
 					.CompilerWarning(ProhibitNewAnalyzer.TooManyDependenciesRule.Id)
-					.WithSpan(3, 50, 3, 109)
-					.WithMessage("The constructor 'new System.Collections.Generic.KeyValuePair<int, int>(1, 2)' has 2 dependencies which is more than allowed"));
+					.WithSpan(1, 1, 4, 2)
+					.WithMessage("The constructor 'Test (int x, int y)' has 2 dependencies which is more than allowed"));
 		}
 
 		[Fact]
@@ -196,14 +195,13 @@ namespace InversionEnforcer.Tests
 			var test =
 @"class Test
 {
-	public void Method() { System.Console.WriteLine(new System.Collections.Generic.KeyValuePair<int, int>(1, 2)); }
+	public Test(int x, int y) {}
 }";
 
 			await Verify.VerifyAnalyzerAsync(
 				test,
 				new Dictionary<string, string>
 				{
-					{ "dotnet_diagnostic.DI0002.excluded_namespaces", "System" },
 					{ "dotnet_diagnostic.DI0003.allowed_number_of_dependencies", "2" }
 				});
 		}
