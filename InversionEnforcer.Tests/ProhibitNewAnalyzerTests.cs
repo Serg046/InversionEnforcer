@@ -185,8 +185,8 @@ namespace InversionEnforcer.Tests
 					{"dotnet_diagnostic.DI0003.allowed_number_of_dependencies", "1"}
 				}, DiagnosticResult
 					.CompilerWarning(ProhibitNewAnalyzer.TooManyDependenciesRule.Id)
-					.WithSpan(1, 1, 4, 2)
-					.WithMessage("The constructor 'Test (int x, int y)' has 2 dependencies which is more than allowed"));
+					.WithSpan(3, 2, 3, 30)
+					.WithMessage("The constructor of the type Test has 2 dependencies which is more than allowed"));
 		}
 
 		[Fact]

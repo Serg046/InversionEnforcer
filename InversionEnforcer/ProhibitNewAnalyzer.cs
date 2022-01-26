@@ -32,7 +32,7 @@ namespace InversionEnforcer
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftCodeAnalysisReleaseTracking", "RS2008:Enable analyzer release tracking", Justification = "No need")]
 		internal static readonly DiagnosticDescriptor TooManyDependenciesRule =
 			new("DI0003", "Too many dependencies",
-				"The constructor '{0} {1}' has {2} dependencies which is more than allowed",
+				"The constructor of the type {0} has {1} dependencies which is more than allowed",
 				"Analyzers",
 				DiagnosticSeverity.Warning, isEnabledByDefault: true);
 
@@ -60,9 +60,7 @@ namespace InversionEnforcer
 				if (ctor.ParameterList.Parameters.Count > _configuration.AllowedNumberOfDependencies)
 				{
 					var typeDeclaration = (TypeDeclarationSyntax) context.Node;
-					var parameters = ctor.DescendantNodes().OfType<ParameterListSyntax>().Single();
-					var location = context.Node.GetLocation();
-					context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, location, typeDeclaration.Identifier, parameters, ctor.ParameterList.Parameters.Count));
+					context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, ctor.GetLocation(), typeDeclaration.Identifier, ctor.ParameterList.Parameters.Count));
 				}
 			}
 		}
