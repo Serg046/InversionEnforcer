@@ -60,7 +60,7 @@ namespace InversionEnforcer
 				if (ctor.ParameterList.Parameters.Count > _configuration.AllowedNumberOfDependencies)
 				{
 					var typeDeclaration = (TypeDeclarationSyntax) context.Node;
-					context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, ctor.GetLocation(), typeDeclaration.Identifier, ctor.ParameterList.Parameters.Count));
+					context.ReportDiagnostic(Diagnostic.Create(TooManyDependenciesRule, ctor.ParameterList.GetLocation(), typeDeclaration.Identifier, ctor.ParameterList.Parameters.Count));
 				}
 			}
 		}
