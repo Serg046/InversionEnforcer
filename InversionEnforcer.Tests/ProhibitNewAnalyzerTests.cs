@@ -205,5 +205,33 @@ namespace InversionEnforcer.Tests
 					{ "dotnet_diagnostic.DI0003.allowed_number_of_dependencies", "2" }
 				});
 		}
+
+		[Fact]
+		public async Task When_target_typed_new_operator_Should_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { object x = new(); System.Console.WriteLine(x); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(test, DiagnosticResult
+				.CompilerWarning(ProhibitNewAnalyzer.NoNewOperatorsRule.Id)
+				.WithSpan(3, 36, 3, 41)
+				.WithMessage("Prefer using dependency inversion to new operator for the type System.Object"));
+		}
+
+		[Fact]
+		public async Task When_target_typed_new_operator_with_exclusion_Should_not_fail()
+		{
+			var test =
+@"class Test
+{
+	public void Method() { object x = new(); System.Console.WriteLine(x); }
+}";
+
+			await Verify.VerifyAnalyzerAsync(test,
+				new Dictionary<string, string> { { "dotnet_diagnostic.DI0002.excluded_namespaces", "System" } });
+		}
 	}
 }

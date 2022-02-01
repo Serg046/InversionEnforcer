@@ -43,7 +43,7 @@ namespace InversionEnforcer
 		{
 			context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
 			context.EnableConcurrentExecution();
-			context.RegisterSyntaxNodeAction(AnalyzeObjectCreationNode, SyntaxKind.ObjectCreationExpression);
+			context.RegisterSyntaxNodeAction(AnalyzeObjectCreationNode, SyntaxKind.ObjectCreationExpression, SyntaxKind.ImplicitObjectCreationExpression);
 			context.RegisterSyntaxNodeAction(AnalyzeTypeDeclarationNode, SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, SyntaxKind.RecordDeclaration);
 		}
 
@@ -67,16 +67,33 @@ namespace InversionEnforcer
 
 		private void AnalyzeObjectCreationNode(SyntaxNodeAnalysisContext context)
 		{
-			if (_configuration == null)
+			switch (context.Node)
 			{
-				var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree);
-				_configuration = new Configuration(context, options);
+				case ObjectCreationExpressionSyntax node:
+				{
+					var type = context.SemanticModel.GetSymbolInfo(node.Type).Symbol;
+					ProcessObjectCreationSymbol(context, type);
+					break;
+				}
+				case ImplicitObjectCreationExpressionSyntax node:
+				{
+					var type = context.SemanticModel.GetOperation(node)?.Type;
+					ProcessObjectCreationSymbol(context, type);
+					break;
+				}
 			}
+		}
 
-			var node = (ObjectCreationExpressionSyntax) context.Node;
-			var type = context.SemanticModel.GetSymbolInfo(node.Type).Symbol;
+		private void ProcessObjectCreationSymbol(SyntaxNodeAnalysisContext context, ISymbol? type)
+		{
 			if (type != null)
 			{
+				if (_configuration == null)
+				{
+					var options = context.Options.AnalyzerConfigOptionsProvider.GetOptions(context.Node.SyntaxTree);
+					_configuration = new Configuration(context, options);
+				}
+
 				var ns = GetNamespace(type);
 				var location = context.Node.GetLocation();
 				if (!_configuration.Validate(location.SourceTree?.FilePath, ns, type, context.Compilation.AssemblyName))
